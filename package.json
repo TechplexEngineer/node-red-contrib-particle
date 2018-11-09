@@ -12,7 +12,8 @@
   },
   "dependencies": {
     "eventsource": "",
-    "request": ""
+    "request": "",
+    "particle-api-js":""
   },
   "eslintConfig": {
     "globals": {
