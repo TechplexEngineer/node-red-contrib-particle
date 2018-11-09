@@ -15,9 +15,35 @@
         <input type="password" id="node-config-input-accesstoken">
     </div>
     <div class="form-row">
+        <label for="node-config-input-prodidorslug"><i class="icon-tag"></i> Product ID</label>
+        <input type="text" id="node-config-input-prodidorslug" placeholder="1234 or slug">
+    </div>
+    <div class="form-row">
         <label for="node-config-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-config-input-name" placeholder="Name">
     </div>
+</script>
+<!-- Help content -->
+<script type="text/x-red" data-help-name="particle-cloud">
+  <p>Credentials on how to connect to the Particle API.</p>
+
+  <h3>Details</h3>
+      <h4>Node Properties</h4>
+
+      <code>Cloud URL</code></br>
+      <p>Only change if you are not using the particle cloud and are instead using a self-hosted particle api.</p>
+
+      <code>Access Token</code></br>
+      <p>You can get your access token from <a href="http://build.particle.io"> build.particle.io</a>. Go to the settings gear (bottom left) copy the Access Token and paste in node config.</p>
+
+      <code>Product ID</code></br>
+      <p>If you have a Particle product you can put the The Product ID or Slug here to get events and call functions on devices that are part of your product.</p>
+
+      <code>Name</code></br>
+      <p>Name to remember this set of configuration by.</p>
+
+
+
 </script>
 <script type="text/javascript">
     RED.nodes.registerType("particle-cloud",{
@@ -26,6 +52,7 @@
     		host: {value:"https://api.particle.io", required:true},
     		port: {value:443, required:true, validate:RED.validators.number()},
     		accesstoken: {value:"", required:true},
+        prodidorslug: {value:""},
     		name: {value:""}
     	},
     	credentials: {
@@ -35,35 +62,35 @@
     		return this.name || this.host + ":" + this.port;
     	},
     	oneditprepare: function() {
-    		$.getJSON("particlecloud/"+this.id,function(data) {
-    			// console.log("(Particle CONFIG) oneditprepare:", data);
-    			if (data.accesstoken) {
-    				$("#node-config-input-accesstoken").val(data.accesstoken);
-    			}
-    		});
+    		// $.getJSON("particlecloud/"+this.id,function(data) {
+    		// 	// console.log("(Particle CONFIG) oneditprepare:", data);
+    		// 	if (data.accesstoken) {
+    		// 		$("#node-config-input-accesstoken").val(data.accesstoken);
+    		// 	}
+    		// });
     	},
     	oneditsave: function() {
-    		var credentials = {};
-    		var newToken = $("#node-config-input-accesstoken").val();
+    		// var credentials = {};
+    		// var newToken = $("#node-config-input-accesstoken").val();
 
-    		credentials.accesstoken = newToken;
+    		// credentials.accesstoken = newToken;
 
-    		// console.log("(Particle CONFIG) oneditsave:");
-    		// console.log(credentials);
+    		// // console.log("(Particle CONFIG) oneditsave:");
+    		// // console.log(credentials);
 
-    		$.ajax({
-    			url: "particlecloud/"+this.id,
-    			type: "POST",
-    			data: credentials,
-    			success: function(result){}
-    		});
+    		// $.ajax({
+    		// 	url: "particlecloud/"+this.id,
+    		// 	type: "POST",
+    		// 	data: credentials,
+    		// 	success: function(result){}
+    		// });
     	},
-    	ondelete: function() {
-    		$.ajax({
-    			url: "particlecloud/"+this.id,
-    			type: "DELETE",
-    			success: function(result){}
-    		});
+    	oneditdelete: function() {
+    		// $.ajax({
+    		// 	url: "particlecloud/"+this.id,
+    		// 	type: "DELETE",
+    		// 	success: function(result){}
+    		// });
     	}
     });
 </script>
@@ -81,12 +108,19 @@
         <label for="node-input-devid"><i class="fa fa-bullseye"></i> Device ID/Name</label>
         <input type="text" id="node-input-devid" placeholder="topic:devid; blank for firehose/local cloud">
     </div>
-  	<br/>
   	<div class="form-row">
-        <label for="node-input-evtname"><i class="icon-tag"></i> Event</label>
+        <label for="node-input-evtname"><i class="icon-tag"></i> Event Prefix</label>
         <input type="text" id="node-input-evtname" placeholder="topic:evtname">
     </div>
-    <br/>
+    <div class="form-row">
+        <label for="node-input-publicevts"><i class="fas fa-stream"></i> All Public Events?</label>
+        <input type="checkbox" id="node-input-publicevts">
+    </div>
+    <br>
+    <div class="form-row">
+        <label for="node-input-label"><i class="icon-tag"></i> Label</label>
+        <input type="text" id="node-input-label" placeholder="">
+    </div>
     <div class="form-row">
         <label for="node-input-consolelog"><i class="fa fa-bug"></i> Verbose logging?</label>
         <input type="checkbox" id="node-input-consolelog">
@@ -117,12 +151,19 @@
       </dl>
   <h3>Details</h3>
       <h4>Node Properties</h4>
+
       <code>Cloud URL</code></br>
       <p>Add or choose an existing Particle cloud configuration.</p>
+
       <code>Device ID/Name</code></br>
       <p>Enter a Device ID or Name of the target Particle Device to subscribe to. For local clouds, device-specific and device-and-event specific events are <a href="https://github.com/spark/spark-server/issues/53" target="_blank">currently not supported</a>. For local cloud setups, you can a) leave the <em>Device ID/Name</em> empty, with the <em>Event Name</em> entered, or b) leave both fields empty to get the public event firehose. Filter this result in Node-RED by writing your own Function.</p>
-      <code>Event</code></br>
-      <p>Enter the SSE name broadcast by your Particle device (via <a href="https://docs.particle.io/reference/firmware/photon/#particle-publish-" target="_blank">Particle.publish()</a>).</p>
+
+      <code>Event Prefix</code></br>
+      <p>Enter the event name broadcast by your Particle device (via <a href="https://docs.particle.io/reference/firmware/photon/#particle-publish-" target="_blank">Particle.publish()</a>). Note you can enter '*' if you supply Device ID and/or a Product ID.</p>
+
+      <code>Label</code></br>
+      <p>Change the label shown on the block.</p>
+
       <code>Verbose logging?</code></br>
       <p>When enabled, log everything to Node-RED logs (warning: while good for testing, this can quickly overflow your log file).</p>
       <p>&nbsp;</p>
@@ -140,18 +181,23 @@
   RED.nodes.registerType("ParticleSSE in", {
   	category: "Particle",
   	defaults: {
-  		pcloud: {value:"", type:"particle-cloud"},
-  		evtname: {value:"", required:true},
-  		devid:   {value:""},
-  		consolelog: {value:false}
+  		pcloud:       {value:"", type:"particle-cloud"},
+  		evtname:      {value:"", required:true},
+  		devid:        {value:""},
+      label:        {value:""},
+  		consolelog:   {value:false},
+      publicevts:   {falue:false}
   	},
   	color:"#00ACED",
   	inputs:1,
   	outputs:1,
   	icon: "particle.png",
   	label: function() {
+      if (this.label) {
+        return this.label;
+      }
   		if (this.evtname === undefined || this.evtname === "") {    // node has not been set with event name
-  			return "ParticleSSE";
+  			return "Events";
   		} else {
   			if(this.devid === undefined || this.devid === "") {       // no device ID provided
   				return "SSE: " + this.evtname;
@@ -203,16 +249,18 @@
         <label for="node-input-ttl"><i class="fas fa-stopwatch"></i> TTL (sec)</label>
         <input type="number" id="node-input-ttl" placeholder="default: 60s">
     </div>
-    <br/>
     <div class="form-row">
         <label>&nbsp;</label>
         <input type="checkbox" id="node-input-once" style="display: inline-block; width: auto; vertical-align: top;">
         <label for="node-input-once" style="width: 70%;">Publish Event on start?</label>
     </div>
-    <br/>
   	<div class="form-row">
         <label for="node-input-repeat"><i class="fa fa-repeat"></i> Repeat (sec)</label>
         <input type="text" id="node-input-repeat" placeholder="topic:repeat; 0 = no repeat">
+    </div>
+    <div class="form-row">
+        <label for="node-input-label"><i class="icon-tag"></i> Label</label>
+        <input type="text" id="node-input-label" placeholder="">
     </div>
     <br/>
     <div class="form-row">
@@ -237,24 +285,37 @@
       </dl>
   <h3>Details</h3>
       <h4>Node Properties</h4>
+
       <code>Cloud URL</code></br>
       <p>Add or choose an existing Particle cloud configuration.</p>
+
       <code>Event</code></br>
       <p>Enter the Particle Event name you want to publish. 'spark' is reserved by the Particle Cloud and cannot be used.</p>
+
       <code>Use topic as Event Name?</code></br>
       <p>When enabled, <code>topic</code> will be used as the event name, as long as it is not blank and not "evtname", "repeat" or "param".</p>
+
       <code>Event Data</code></br>
       <p>Sets a data string to send along with the published Event (maximum 63 characters).</p>
+
       <code>Private?</code></br>
       <p>Sets the public/private status of the published Event.</p>
+
       <code>TTL</code></br>
       <p>How long the published Event should persist in the Particle Cloud.</p>
+
       <code>Publish Event on start?</code></br>
       <p>If checked, the Event will be published immediately after the node loads (i.e. on Node-RED startup).</p>
+
       <code>Repeat (sec)</code><br/>
       <p>If a repeat interval is desired, enter a value (in seconds). 0 = no repeat.</p>
+
+      <code>Label</code></br>
+      <p>Change the label shown on the block.</p>
+
       <code>Verbose logging?</code></br>
       <p>When enabled, log everything to Node-RED logs (warning: while good for testing, this can quickly overflow your log file).</p>
+
       <p>&nbsp;</p>
       <h4>Notes</h4>
       <p>Upstream messages with the appropriate <code>topic</code> allow for dynamic modification of the node&apos;s properties. Properties defined in each node&apos;s edit box remain and are restored when the flows are re-deployed. The labels on the nodes will also not change to reflect any new properties, but a green status ring and message will be shown next to nodes that have their properties dynamically modified by up-stream messages.</p>
@@ -273,7 +334,7 @@
   RED.nodes.registerType("ParticlePublish out", {
   	category: "Particle",
   	defaults: {
-  		pcloud:      {value:"", type:"particle-cloud"},
+  		pcloud:       {value:"", type:"particle-cloud"},
   		evtname:      {value:""},
   		evtnametopic: {value:false},
   		param:        {value:"", validate:function(v) { return v.length < 64; } },
@@ -281,7 +342,8 @@
   		ttl:          {value:60, required: false, validate:function(v) { return (v >= 0 && v < 16777216); } },
       once:         {value:false},
   		repeat:       {value:0, validate:function(v) { return v >= 0; } },
-  		consolelog:   {value:false}
+  		consolelog:   {value:false},
+      label:        {value:""},
   	},
   	color:"#00ACED",
   	inputs:1,
@@ -289,10 +351,13 @@
   	icon: "particle.png",
 	align: "right",
   	label: function() {
+      if (this.label) {
+        return this.label;
+      }
   		if (this.evtname === undefined || this.evtname === "") {    // node has not been set with event name
-  			return "ParticlePublish";
+  			return "Publish";
   		} else {
-  			return "ParticlePublish (" + this.evtname + ")";
+  			return "Publish (" + this.evtname + ")";
   		}
   	},
   	labelStyle: function() {
@@ -319,7 +384,6 @@
         <label for="node-input-devid"><i class="fa fa-bullseye"></i> Device ID/Name</label>
         <input type="text" id="node-input-devid" placeholder="topic:devid">
   </div>
-	<br/>
 	<div class="form-row">
         <label for="node-input-fname"><i class="icon-tag"></i> Cloud Function</label>
         <input type="text" id="node-input-fname" placeholder="topic:fname">
@@ -328,17 +392,19 @@
         <label for="node-input-param"><i class="icon-tag"></i> Parameter</label>
         <input type="text" id="node-input-param" placeholder="topic:param">
   </div>
-	<br/>
   <div class="form-row">
       <label>&nbsp;</label>
       <input type="checkbox" id="node-input-once" style="display: inline-block; width: auto; vertical-align: top;">
       <label for="node-input-once" style="width: 70%;">Call Function on start?</label>
   </div>
-  <br/>
 	<div class="form-row">
         <label for="node-input-repeat"><i class="fa fa-repeat"></i> Repeat (sec)</label>
         <input type="text" id="node-input-repeat" placeholder="topic:repeat; 0 = no repeat">
   </div>
+  <div class="form-row">
+        <label for="node-input-label"><i class="icon-tag"></i> Label</label>
+        <input type="text" id="node-input-label" placeholder="">
+    </div>
   <br/>
   <div class="form-row">
       <label for="node-input-consolelog"><i class="fa fa-bug"></i> Verbose logging?</label>
@@ -369,20 +435,31 @@
       </dl>
   <h3>Details</h3>
       <h4>Node Properties</h4>
+
       <code>Cloud URL</code></br>
       <p>Add or choose an existing Particle cloud configuration.</p>
+
       <code>Device ID/Name</code></br>
       <p>Enter a Device ID or Name of the target Particle Device where the cloud Function originates from.</p>
+
       <code>Cloud Function</code></br>
       <p>Enter the name of the Particle cloud Function.</p>
+
       <code>Parameter</code></br>
       <p>Provide a (maximum) 63-byte string as parameter as required by your cloud Function.</p>
+
       <code>Call Function on start?</code></br>
       <p>If checked, the Function call will initiate immediately after the node loads (i.e. on Node-RED startup).</p>
+
       <code>Repeat (sec)</code></br>
       <p>If a repeat interval is desired, enter a value (in seconds); 0 = no repeat.</p>
+
+      <code>Label</code></br>
+      <p>Change the label shown on the block.</p>
+
       <code>Verbose logging?</code></br>
       <p>When turned on, events will be logged to Node-RED logs (warning: this can quickly overflow your log file).</p>
+
       <p>&nbsp;</p>
       <h4>Notes</h4>
       <p>Sending input messages allows dynamic modification of the node&apos;s properties. Properties defined in each node&apos;s edit box remain and are restored when the flows are re-deployed. The labels on the nodes will also not change to reflect any new properties, but a green status ring and message will be shown next to nodes that have their properties dynamically modified by up-stream messages.</p>
@@ -404,7 +481,8 @@
   		param:      {value:""},
   		once:       {value:false},
   		repeat:     {value:0, validate:function(v) { return v >= 0; } },
-  		consolelog: {value:false}
+  		consolelog: {value:false},
+      label: {value:""}
   	},
   	color:"#00ACED",
   	inputs:1,
@@ -412,10 +490,13 @@
   	icon: "particle.png",
   	align: "right",
   	label: function() {
+      if (this.label) {
+        return this.label;
+      }
   		if (this.fname === undefined || this.fname === "" || this.devid === undefined || this.devid === "") {    // node has not been set with required data
-  			return "ParticleFunc";
+  			return "Cloud Func";
   		} else {
-  			return "func (" + this.devid + "): " + this.fname;
+  			return "Func (" + this.devid + "): " + this.fname;
   		}
   	},
   	labelStyle: function() {
@@ -458,6 +539,10 @@
         <label for="node-input-repeat"><i class="fa fa-repeat"></i> Repeat (sec)</label>
         <input type="text" id="node-input-repeat" placeholder="topic:repeat; 0 = no repeat">
   </div>
+  <div class="form-row">
+        <label for="node-input-label"><i class="icon-tag"></i> Label</label>
+        <input type="text" id="node-input-label" placeholder="">
+  </div>
   <br/>
   <div class="form-row">
       <label for="node-input-consolelog"><i class="fa fa-bug"></i> Verbose logging?</label>
@@ -488,18 +573,28 @@
       </dl>
   <h3>Details</h3>
       <h4>Node Properties</h4>
+
       <code>Cloud URL</code><br/>
       <p>Add or choose an existing Particle cloud configuration.</p>
+
       <code>Device ID/Name</code><br/>
       <p>Enter a Device ID or Name of the target Particle Device where the variable can be retrieved.</p>
+
       <code>Device Variable Name</code><br/>
       <p>Enter the name of the Particle variable.</p>
+
       <code>Retrieve variable on start?</code><br/>
       <p>If checked, the variable retreival will initiate immediately after the node loads (i.e. on Node-RED startup).</p>
+
       <code>Repeat (sec)</code><br/>
       <p>If a repeat interval is desired, enter a value (in seconds); 0 = no repeat.</p>
+
+      <code>Label</code></br>
+      <p>Change the label shown on the block.</p>
+
       <code>Verbose logging?</code><br/>
       <p>When turned on, events will be logged to Node-RED logs (warning: this can quickly overflow your log file).</p>
+
       <p>&nbsp;</p>
       <h4>Notes</h4>
       <p>Sending input messages allows dynamic modification of the node&apos;s properties. Properties defined in each node&apos;s edit box remain and are restored when the flows are re-deployed. The labels on the nodes will also not change to reflect any new properties, but a green status ring and message will be shown next to nodes that have their properties dynamically modified by up-stream messages.</p>
@@ -520,17 +615,21 @@
     		getvar: {value:"", required:true, validate:function(v) { return v.length < 13; } },
     		once: {value:false},
     		repeat: {value:0, validate:function(v) { return v >= 0; } },
-    		consolelog: {value:false}
+    		consolelog: {value:false},
+        label: {value:""}
     	},
     	color:"#00ACED",
     	inputs:1,
     	outputs:1,
     	icon: "particle.png",
     	label: function() {
+        if (this.label) {
+          return this.label;
+        }
     		if (this.getvar === undefined || this.getvar === "" || this.devid === undefined || this.devid === "") {    // node has not been set with required data
-    			return "ParticleVar";
+    			return "Cloud Var";
     		} else {
-    			return "var (" + this.devid + "): " + this.getvar;
+    			return "Var (" + this.devid + "): " + this.getvar;
     		}
     	},
     	labelStyle: function() {

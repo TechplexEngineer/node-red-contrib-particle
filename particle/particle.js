@@ -15,6 +15,7 @@ module.exports = function(RED) {
 		RED.nodes.createNode(this, n);
 		this.host = n.host;
 		this.port = n.port;
+		this.prodidorslug = n.prodidorslug;
 		this.name = n.name;
 	}
 	// register the existence of the Particle Cloud credentials configuration node
@@ -38,35 +39,39 @@ module.exports = function(RED) {
 		particlemodule = this;
 
 		// Get all properties from node instance settings
-		this.config = n;
-		this.devid = n.devid;
-		this.evtname = n.evtname;
-		this.pcloud = RED.nodes.getNode(n.pcloud);
-		this.consolelog = n.consolelog;
-		this.timeoutDelay = 5; // ms
+		particlemodule.config = n;
+		particlemodule.devid = n.devid;
+		particlemodule.evtname = n.evtname;
+		particlemodule.pcloud = RED.nodes.getNode(n.pcloud);
+		particlemodule.consolelog = n.consolelog;
+		particlemodule.timeoutDelay = 5; // ms
 
 		// keep track of updated state (for updating status icons)
-		this.propChanged = false;
+		particlemodule.propChanged = false;
 
-		(this.pcloud.host === "https://api.particle.io") ? this.isLocal = false: this.isLocal = true;
+		if (particlemodule.pcloud.host === "https://api.particle.io") {
+			particlemodule.isLocal = false;
+		} else {
+			particlemodule.isLocal = true;
+		}
 
-		if (this.pcloud.credentials.accesstoken == null || this.pcloud.credentials.accesstoken === "") {
-			this.status({
+		if (particlemodule.pcloud.credentials.accesstoken == null || particlemodule.pcloud.credentials.accesstoken === "") {
+			particlemodule.status({
 				fill: "red",
 				shape: "dot",
 				text: "No Particle access token"
 			});
-			this.error("No Particle access token in configuration node");
+			particlemodule.error("No Particle access token in configuration node");
 		} else {
-			this.status({});
+			particlemodule.status({});
 		}
 
 		setTimeout(function() {
 			particlemodule.emit("processSSE", {});
-		}, this.timeoutDelay);
+		}, particlemodule.timeoutDelay);
 
 		// Called when there an input from upstream node(s)
-		this.on("input", function(msg) {
+		particlemodule.on("input", function(msg) {
 			// Retrieve all parameters from Message
 			var validOp = false;
 			var val = msg;
@@ -102,15 +107,58 @@ module.exports = function(RED) {
 		});
 
 		// SSE (Server-Sent-Event) Subscription
-		this.on("processSSE", function() {
-			// if we're dealing with a local cloud, or if device ID is empty, fallback to public/event firehose & ignore device ID
-			var url;
-			var eventname = encodeURIComponent(this.evtname);
-			if (this.isLocal || !this.devid) {
-				url = this.pcloud.host + ":" + this.pcloud.port + "/v1/events/" + eventname + "?access_token=" + this.pcloud.credentials.accesstoken;
-			} else {
-				url = this.pcloud.host + ":" + this.pcloud.port + "/v1/devices/" + this.devid + "/events/" + eventname + "?access_token=" + this.pcloud.credentials.accesstoken;
+		particlemodule.on("processSSE", function() {
+
+
+			// particlemodule.pcloud.host
+			// particlemodule.pcloud.port
+			// particlemodule.pcloud.productidorslug
+			// particlemodule.isLocal
+			// particlemodule.devid
+			// particlemodule.evtname
+			// particlemodule.publicevts
+
+			let eventPrefix = particlemodule.evtname;
+			if (eventPrefix === "*") {
+				eventPrefix = "";
 			}
+			eventPrefix = encodeURIComponent(eventPrefix);
+
+			//set base url
+			let url = `${this.pcloud.host}:${this.pcloud.port}/v1`;
+
+			if (particlemodule.pcloud.productidorslug) {
+				if (!particlemodule.devid) {
+					//Product event stream
+					//GET /v1/products/:productIdOrSlug/events/[:eventPrefix]
+					url += `/products/${particlemodule.pcloud.productidorslug}/events/${eventPrefix}`;
+				} else {
+					//Product device event steam
+					//GET /v1/products/:productIdOrSlug/devices/:deviceId/events/[:eventPrefix]
+					url += `/products/${particlemodule.pcloud.productidorslug}/devices/${particlemodule.devid}/events/${eventPrefix}`;
+				}
+			} else if (particlemodule.publicevts) {
+				//Get a stream of events
+				//GET /v1/events/:eventPrefix
+				if (particlemodule.isLocal) {
+					url += `/events/${eventPrefix}`;
+				} else {
+					url += `/events/${encodeURIComponent(particlemodule.evtname)}`;
+					//Note Particle does not support GET /v1/events/ without a filter
+					//So if the user enters an * we pass that as the filter.
+				}
+			} else if (!particlemodule.devid) {
+				//Get a stream of your events
+				//GET /v1/devices/events/[:eventPrefix]
+				url += `/devices/events/${eventPrefix}`;
+			} else {
+				//Get a stream of events for a device
+				//GET /v1/devices/:deviceId/events/[:eventPrefix]
+				url += `/devices/${particlemodule.devid}/events/${eventPrefix}`;
+			}
+			url += "?access_token=" + this.pcloud.credentials.accesstoken;
+			if (this.consolelog) console.log("(ParticleSSE) URL: ", url);
+
 
 			if (this.esSSE != undefined) {
 				this.esSSE.close(); // close any pre-existing, open connections
@@ -122,7 +170,8 @@ module.exports = function(RED) {
 			var evt = this.evtname;
 
 			// Add EventSource Listener
-			this.esSSE.addEventListener(evt, function(e) {
+			this.esSSE.onmessage = function(e) {
+				console.log(e);
 				var data = JSON.parse(e.data);
 				var msg = {
 					raw: data,
@@ -132,7 +181,7 @@ module.exports = function(RED) {
 					id: data.coreid // FIXME/REMINDER: currently spark-server still uses coreid as property name
 				};
 				particlemodule.send(msg);
-			}, false);
+			};
 
 			this.esSSE.onopen = function() {
 				particlemodule.status({
@@ -162,7 +211,7 @@ module.exports = function(RED) {
 			};
 		});
 
-		this.on("close", function() {
+		particlemodule.on("close", function() {
 			if (this.esSSE != null) {
 				if (this.consolelog) console.log("(ParticleSSE) EventSource closed.");
 				this.esSSE.close();
@@ -209,7 +258,11 @@ module.exports = function(RED) {
 		// keep track of updated state (for updating status icons)
 		this.propChanged = false;
 
-		(this.pcloud.host === "https://api.particle.io") ? this.isLocal = false: this.isLocal = true;
+		if (this.pcloud.host === "https://api.particle.io") {
+			this.isLocal = false;
+		} else {
+			this.isLocal = true;
+		}
 
 		if (this.pcloud.credentials.accesstoken == null || this.pcloud.credentials.accesstoken === "") {
 			this.status({
