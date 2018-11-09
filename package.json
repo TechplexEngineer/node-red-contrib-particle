@@ -11,8 +11,6 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "eventsource": "",
-    "request": "",
     "particle-api-js":""
   },
   "eslintConfig": {
@@ -25,7 +23,8 @@
   },
   "node-red": {
     "nodes": {
-      "particle": "particle/particle.js"
+      "event-stream": "particle/event-stream.js",
+      "cloud-config": "particle/cloud-config.js"
     }
   },
   "keywords": [
@@ -37,11 +36,15 @@
     "P1",
     "iot",
     "spark",
-    "device"
+    "device",
+    "argon",
+    "boron",
+    "xenon"
   ],
-  "author": "Chuan Khoo <khoo.chuan@gmail.com> (https://chuank.com)",
+  "author": "Blake Bourque (https://github.com/TechplexEngineer)",
   "contributors": [
-    "Ethan (https://github.com/techlemur)"
+    "Ethan (https://github.com/techlemur)",
+    "Chuan Khoo <khoo.chuan@gmail.com> (https://chuank.com)"
   ],
   "license": "MIT"
 }

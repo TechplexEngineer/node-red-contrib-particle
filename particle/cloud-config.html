@@ -1,0 +1,69 @@
+<!-- Particle CONFIGURATION node -->
+<script type="text/x-red" data-template-name="particle-cloud">
+    <div class="form-row">
+        <label for="node-config-input-host"><i class="fa fa-cloud"></i> Cloud URL</label>
+        <input class="input-append-left" type="text" id="node-config-input-host" placeholder="IP or hostname" style="width:40%;">
+        <label for="node-config-input-port" style="margin-left: 10px; width: 35px; "> Port</label>
+        <input type="text" id="node-config-input-port" placeholder="443" style="width:45px">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-accesstoken"><i class="fa fa-key"></i> Access Token</label>
+        <input type="password" id="node-config-input-accesstoken">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-prodidorslug"><i class="icon-tag"></i> Product ID</label>
+        <input type="text" id="node-config-input-prodidorslug" placeholder="1234 or slug">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-config-input-name" placeholder="Name">
+    </div>
+</script>
+<!-- Help content -->
+<script type="text/x-red" data-help-name="particle-cloud">
+  <p>Credentials on how to connect to the Particle API.</p>
+
+  <h3>Details</h3>
+      <h4>Node Properties</h4>
+
+      <code>Cloud URL</code></br>
+      <p>Only change if you are not using the particle cloud and are instead using a self-hosted particle api.</p>
+
+      <code>Access Token</code></br>
+      <p>You can get your access token from <a href="http://build.particle.io"> build.particle.io</a>. Go to the settings gear (bottom left) copy the Access Token and paste in node config.</p>
+
+      <code>Product ID</code></br>
+      <p>If you have a Particle product you can put the The Product ID or Slug here to get events and call functions on devices that are part of your product.</p>
+
+      <code>Name</code></br>
+      <p>Name to remember this set of configuration by.</p>
+
+
+
+</script>
+<script type="text/javascript">
+    RED.nodes.registerType("particle-cloud",{
+    	category: "config",
+    	defaults: {
+    		host: {value:"https://api.particle.io", required:true},
+    		port: {value:443, required:true, validate:RED.validators.number()},
+    		accesstoken: {value:"", required:true},
+        prodidorslug: {value:""},
+    		name: {value:""}
+    	},
+    	credentials: {
+    		accesstoken: {type: "password"}
+    	},
+    	label: function() {
+    		return this.name || this.host + ":" + this.port;
+    	},
+    	oneditprepare: function() {
+    	},
+    	oneditsave: function() {
+    	},
+    	oneditdelete: function() {
+    	}
+    });
+</script>
+<!-- end Particle CONFIGURATION node -->
+
