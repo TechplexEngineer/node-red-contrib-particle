@@ -1,0 +1,153 @@
+<!-- Particle Publish node -->
+<!-- Edit Dialog -->
+<script type="text/x-red" data-template-name="ParticlePublish out">
+    <div class="form-row">
+        <label for="node-input-pcloud"><i class="fa fa-cloud"></i> Cloud URL</label>
+        <input type="text" id="node-input-pcloud">
+    </div>
+  	<div class="form-row">
+        <label for="node-input-evtname"><i class="icon-tag"></i> Event</label>
+        <input type="text" id="node-input-evtname" placeholder="topic:evtname; do not use 'spark'">
+    </div>
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-evtnametopic" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-evtnametopic" style="width: 70%;">Use topic as Event Name?</label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-param"><i class="icon-tag"></i> Event Data</label>
+        <input type="text" id="node-input-param" placeholder="maximum 63 characters">
+    </div>
+    <br/>
+    <div class="form-row">
+        <label><i class="fa fa-user-secret"></i></label>
+        <input type="checkbox" id="node-input-private" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-private" style="width: 70%;">Publish as a private event?</label>
+    </div>
+    <div class="form-row">
+        <label for="node-input-ttl"><i class="fas fa-stopwatch"></i> TTL (sec)</label>
+        <input type="number" id="node-input-ttl" placeholder="default: 60s">
+    </div>
+    <div class="form-row">
+        <label>&nbsp;</label>
+        <input type="checkbox" id="node-input-once" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-once" style="width: 70%;">Publish Event on start?</label>
+    </div>
+  	<div class="form-row">
+        <label for="node-input-repeat"><i class="fa fa-repeat"></i> Repeat (sec)</label>
+        <input type="text" id="node-input-repeat" placeholder="topic:repeat; 0 = no repeat">
+    </div>
+    <div class="form-row">
+        <label for="node-input-label"><i class="icon-tag"></i> Label</label>
+        <input type="text" id="node-input-label" placeholder="">
+    </div>
+    <br/>
+    <div class="form-row">
+        <label for="node-input-consolelog"><i class="fa fa-bug"></i> Verbose logging?</label>
+        <input type="checkbox" id="node-input-consolelog">
+    </div>
+</script>
+<!-- Help content -->
+<script type="text/x-red" data-help-name="ParticlePublish out">
+  <p>Lets you publish events to a Particle cloud (official or local).</p>
+  <h3>Inputs</h3>
+      <dl class="message-properties">
+          <dt class="optional">topic <span class="property-type">string</span></dt>
+          <dd> set topic to <code>evtname</code>.</dd>
+          <dt class="required">payload <span class="property-type">string</span></dt>
+          <dd> depending on <code>topic</code>, <code>payload</code> will set new Event name for the node or publish Particle Event using <code>payload</code> as the data (see below for details).</dd>
+      </dl>
+  <h3>Outputs</h3>
+      <dl class="message-properties">
+          <dt>raw <span class="property-type">JSON</span></dt>
+          <dd>the Particle Cloud will respond with either <code>true</code> or <code>false</code> after the Event is published.</dd>
+      </dl>
+  <h3>Details</h3>
+      <h4>Node Properties</h4>
+
+      <code>Cloud URL</code></br>
+      <p>Add or choose an existing Particle cloud configuration.</p>
+
+      <code>Event</code></br>
+      <p>Enter the Particle Event name you want to publish. 'spark' is reserved by the Particle Cloud and cannot be used.</p>
+
+      <code>Use topic as Event Name?</code></br>
+      <p>When enabled, <code>topic</code> will be used as the event name, as long as it is not blank and not "evtname", "repeat" or "param".</p>
+
+      <code>Event Data</code></br>
+      <p>Sets a data string to send along with the published Event (maximum 63 characters).</p>
+
+      <code>Private?</code></br>
+      <p>Sets the public/private status of the published Event.</p>
+
+      <code>TTL</code></br>
+      <p>How long the published Event should persist in the Particle Cloud.</p>
+
+      <code>Publish Event on start?</code></br>
+      <p>If checked, the Event will be published immediately after the node loads (i.e. on Node-RED startup).</p>
+
+      <code>Repeat (sec)</code><br/>
+      <p>If a repeat interval is desired, enter a value (in seconds). 0 = no repeat.</p>
+
+      <code>Label</code></br>
+      <p>Change the label shown on the block.</p>
+
+      <code>Verbose logging?</code></br>
+      <p>When enabled, log everything to Node-RED logs (warning: while good for testing, this can quickly overflow your log file).</p>
+
+      <p>&nbsp;</p>
+      <h4>Notes</h4>
+      <p>Upstream messages with the appropriate <code>topic</code> allow for dynamic modification of the node&apos;s properties. Properties defined in each node&apos;s edit box remain and are restored when the flows are re-deployed. The labels on the nodes will also not change to reflect any new properties, but a green status ring and message will be shown next to nodes that have their properties dynamically modified by up-stream messages.</p>
+      <p>If <strong>Use topic as Event Name</strong> is enabled, send a <code>msg</code> containing the event name as <code>topic</code> and data as <code>payload</code>.</p>
+      <p>You can also set <code>msg.topic</code> to <code>evtname</code>, <code>param</code> or <code>repeat</code> to modify the Event name, data or the repeat interval respectively.</p>
+      <p>If the Event name is blank (either in the configuration of the node or updated dynamically), "NodeRED" will be used as the Event name.</p>
+      <p>Properties defined in each node&apos;s edit box remain and are restored when the flows are re-deployed. The labels on the nodes will also not change to reflect any new properties, but a green status ring and message will be shown next to nodes that have their properties dynamically modified by up-stream messages.</p>
+  <h3>References</h3>
+      <ul>
+          <li><a href="https://docs.particle.io/reference/api/#publish-an-event" target="_blank">Particle Docs: Publish an event</a></li>
+          <li><a href="https://github.com/chuank/node-red-contrib-particle" target="_blank">GitHub</a> - the node&apos;s github repository</li>
+      </ul>
+</script>
+<!-- code -->
+<script type="text/javascript">
+  RED.nodes.registerType("ParticlePublish out", {
+  	category: "Particle",
+  	defaults: {
+  		pcloud:       {value:"", type:"particle-cloud"},
+  		evtname:      {value:""},
+  		evtnametopic: {value:false},
+  		param:        {value:"", validate:function(v) { return v.length < 64; } },
+  		private:      {value:false},
+  		ttl:          {value:60, required: false, validate:function(v) { return (v >= 0 && v < 16777216); } },
+      once:         {value:false},
+  		repeat:       {value:0, validate:function(v) { return v >= 0; } },
+  		consolelog:   {value:false},
+      label:        {value:""},
+  	},
+  	color:"#00ACED",
+  	inputs:1,
+  	outputs:1,
+  	icon: "particle.png",
+	align: "right",
+  	label: function() {
+      if (this.label) {
+        return this.label;
+      }
+  		if (this.evtname === undefined || this.evtname === "") {    // node has not been set with event name
+  			return "Publish";
+  		} else {
+  			return "Publish (" + this.evtname + ")";
+  		}
+  	},
+  	labelStyle: function() {
+  		return this.evtname ? "":"node_label_italic";
+  	},
+	  oneditprepare: function() {
+  	},
+	  oneditsave: function() {
+  	},
+  	ondelete: function() {
+  	}
+  });
+</script>
+<!-- end Publish node -->
