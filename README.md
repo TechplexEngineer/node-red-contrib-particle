@@ -1,12 +1,17 @@
-node-red-contrib-particle
+node-red-contrib-particle2
 -------------------------
 
 Node-RED node to connect to [Particle Devices](https://www.particle.io/), either via the Particle.io Cloud, or a locally installed `spark-server`. This can be used to connect to the Particle Core/Photon/P1/Electron, publish Events, call Functions, read Variables or listen to Server-Sent-Events (SSEs).
 
+History
+-------
+
+Note this is based on the work of [Chuan Khoo](https://github.com/chuank/node-red-contrib-particle). The major difference is using the [particle-api-js](https://github.com/particle-iot/particle-api-js) SDK to simplify the code and add support for Particle [Product endpoints](https://docs.particle.io/reference/device-cloud/api/#products).
+
 Install
 -------
 
-    npm install node-red-contrib-particle
+    npm install node-red-contrib-particle2
 
 Usage
 -----
