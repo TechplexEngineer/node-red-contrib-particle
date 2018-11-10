@@ -46,8 +46,11 @@ module.exports = function(RED) {
 			particlemodule.eventStream = null;
 		}
 
+		const config = {name:particlemodule.evtname, product:'upbed-hub-v100', auth: particlemodule.pcloud.credentials.accesstoken};
 
-		particle.getEventStream({name:'raw', product:'upbed-hub-v100', auth: particlemodule.pcloud.credentials.accesstoken}).then(function(stream) {
+		if (particlemodule.consolelog) console.log("(ParticleSSE) Config:", config);
+
+		particle.getEventStream(config).then(function(stream) {
 			particlemodule.status({
 				fill: "green",
 				shape: particlemodule.propChanged ? "ring" : "dot",
