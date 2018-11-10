@@ -48,7 +48,7 @@ module.exports = function(RED) {
 
 		const config = { //@todo handle bad input
 			name: particlemodule.evtname.trim(),
-			product: particlemodule.pcloud.credentials.prodidorslug.trim(),
+			product: particlemodule.pcloud.prodidorslug.trim(),
 			auth: particlemodule.pcloud.credentials.accesstoken.trim()};
 
 		if (particlemodule.consolelog) console.log("(ParticleSSE) Config:", config);
