@@ -73,7 +73,7 @@ module.exports = function(RED) {
 					shape: "dot",
 					text: "Closed"
 				});
-				if (this.consolelog) console.log("(ParticleSSE) Closed");
+				if (particlemodule.consolelog) console.log("(ParticleSSE) Closed");
 			});
 		}).catch(function(error) {
 			particlemodule.status({
@@ -81,7 +81,7 @@ module.exports = function(RED) {
 				shape: "ring",
 				text: "Error - refer to log"
 			});
-			if (this.consolelog) console.log("(Particle SSE) Error");
+			if (particlemodule.consolelog) console.log("(Particle SSE) Error: ",error);
 		});
 
 		particlemodule.on("close", function() {
